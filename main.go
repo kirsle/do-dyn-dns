@@ -111,7 +111,6 @@ func main() {
 
 		config.LastIPv4 = ipv4.String()
 		config.LastIPv6 = ipv6.String()
-		fmt.Printf("%v\n", config)
 		WriteConfig(config)
 	} else {
 		fmt.Println("No changes detected in my IP address")
@@ -132,22 +131,14 @@ func UpdateDNS(config Config, ipv4, ipv6 net.IP) {
 		domainName = domainOverride
 	}
 
-	// Get the domain list.
-	domain, _, err := client.Domains.Get(ctx, domainName)
-	if err != nil {
-		fmt.Printf("Could not look up DNS for domain %s: doesn't exist in DO?\n", domainName)
-		fmt.Printf("Error given from API: %s\n", err)
-		os.Exit(1)
-	}
-
-	_ = domain
-
 	// Get the DNS records. TODO: support domains with more than 50 records.
 	records, _, err := client.Domains.Records(ctx, domainName, &godo.ListOptions{
 		PerPage: 50,
 	})
 	if err != nil {
-		panic(err)
+		fmt.Printf("Could not look up DNS for domain %s: doesn't exist in DO?\n", domainName)
+		fmt.Printf("Error given from API: %s\n", err)
+		os.Exit(1)
 	}
 
 	// Find A and AAAA records, and delete them.
