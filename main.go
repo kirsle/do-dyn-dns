@@ -12,6 +12,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"golang.org/x/oauth2"
 
@@ -37,6 +38,7 @@ type Config struct {
 	LastIPv6    string      `json:"ipv6,omitempty"`
 	TTL         int         `json:"ttl"`
 	RecordTypes RecordTypes `json:"recordTypes"`
+	LastRun     string      `json:"lastRun"`
 }
 
 // RecordTypes is the config attribute for supporting IPv4 vs. IPv6.
@@ -76,6 +78,11 @@ func main() {
 		Setup()
 	}
 
+	// Print the last run time.
+	if config.LastRun != "" {
+		fmt.Printf("Last time this program ran was: %s\n", config.LastRun)
+	}
+
 	// Collect our IP address(es).
 	var (
 		ipv4    net.IP
@@ -108,13 +115,15 @@ func main() {
 		fmt.Println("My IP address has changed from when I last checked!")
 		fmt.Println("Updating DO DNS now!")
 		UpdateDNS(config, ipv4, ipv6)
-
-		config.LastIPv4 = ipv4.String()
-		config.LastIPv6 = ipv6.String()
-		WriteConfig(config)
 	} else {
 		fmt.Println("No changes detected in my IP address")
 	}
+
+	// Update the stored configuration to, at the very least, refresh the
+	// "last run" time.
+	config.LastIPv4 = ipv4.String()
+	config.LastIPv6 = ipv6.String()
+	WriteConfig(config)
 }
 
 // UpdateDNS uses the Digital Ocean API to update your DNS records.
@@ -337,6 +346,10 @@ func WriteConfig(config Config) error {
 	if config.LastIPv6 == "<nil>" {
 		config.LastIPv6 = ""
 	}
+
+	// Update the last run time.
+	now := time.Now()
+	config.LastRun = now.Format("Mon Jan 2 15:04:05 -0700 MST 2006")
 
 	fh, err := os.Create(configFile)
 	if err != nil {
