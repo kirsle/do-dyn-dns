@@ -194,7 +194,7 @@ func UpdateDNS(config Config, ipv4, ipv6 net.IP) {
 
 // GetExternalIP gets an external IP address.
 func GetExternalIP(version int) (result net.IP, err error) {
-	url := fmt.Sprintf("https://ipv%d.myexternalip.com/raw", version)
+	url := fmt.Sprintf("https://v%d.ident.me/", version)
 
 	resp, err := http.Get(url)
 	if err != nil {
