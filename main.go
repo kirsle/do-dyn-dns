@@ -75,7 +75,7 @@ func main() {
 
 	// If no access token configured, run setup.
 	if config.AccessToken == "" {
-		Setup()
+		config = Setup()
 	}
 
 	// Print the last run time.
@@ -214,7 +214,7 @@ func GetExternalIP(version int) (result net.IP, err error) {
 }
 
 // Setup asks for the configuration properties.
-func Setup() {
+func Setup() Config {
 	fmt.Printf("do-dyn-dns v%s\n\n"+
 		"I'm going to ask a few questions to configure this app. (To reconfigure\n"+
 		"it in the future, run `do-dyn-dns -config`\n\n",
@@ -272,7 +272,9 @@ func Setup() {
 			AAAA: ipv6,
 		},
 	}
+
 	WriteConfig(config)
+	return config
 }
 
 // Prompt asks a question and gets an answer.
